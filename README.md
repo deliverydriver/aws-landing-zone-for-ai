@@ -1,128 +1,60 @@
-# AWS Multi-Account Landing Zone for AI & Agentic Workloads
+# Multi-Account Landing Zone for AI & Agentic Workloads
 
-**A production-grade, opinionated multi-account foundation on AWS, specifically designed for long-running autonomous agents, voice systems, research workloads, and sovereign AI infrastructure.**
+A production-grade, opinionated multi-account foundation on AWS designed for long-running autonomous agents, voice systems, research workloads, and sovereign AI infrastructure.
 
-This is a **living project** that will be continuously updated as I progress through the AWS Certified Solutions Architect – Professional exam and build real production agent platforms.
+## Problems This Addresses
 
-## Why This Project Matters (For Exams + Career)
+Standard multi-account strategies assume relatively stateless, request-oriented workloads. AI and agentic systems introduce different pressures:
 
-In almost every serious Solutions Architect interview (especially at senior/lead/consulting level), you will be asked:
+- Long-running stateful processes that need consistent identity, memory, and tool access over hours or days
+- Highly variable and unpredictable spend from model inference and tool use
+- The need to isolate exploratory/research agents from production customer-facing agents without losing the ability to share common data planes
+- Security boundaries around tool execution that are more nuanced than typical service-to-service access
+- Cost attribution that must survive agent delegation and multi-turn workflows
 
-- "How would you design a multi-account strategy?"
-- "How do you handle security and governance at scale?"
-- "How would you isolate different workloads (e.g. research agents vs production customer-facing agents)?"
+This repository documents the account structure, governance controls, networking model, and baseline services required to operate under those conditions.
 
-This project gives you a concrete, battle-tested answer — and one that is differentiated because it is built for the emerging world of **agentic AI systems** rather than generic web apps.
-
-### AWS Certified Solutions Architect – Professional Exam Coverage
-
-This project directly maps to multiple domains:
-
-| Exam Domain | How This Project Demonstrates Mastery |
-|-------------|---------------------------------------|
-| Design for organizational complexity | Full OU structure, SCPs, IAM Identity Center, cross-account access patterns |
-| Design for security & compliance | Least privilege at scale, service control policies, KMS strategies, logging/monitoring baseline |
-| Design for new solutions | Landing zone as the foundation for migrating/building AI platforms |
-| Design for reliability & operational excellence | Standardized account baselines, tagging, backup, observability |
-| Design for cost optimization | Chargeback/showback design, Savings Plans strategy per workload type |
-
-## Target Architecture (Living)
-
-**High-level structure (will evolve):**
+## Current Target Structure
 
 ```
-Management Account (Control Tower)
+Management
 ├── Security OU
 │   ├── Log Archive
-│   ├── Security Tooling (GuardDuty, Security Hub, Inspector, etc.)
+│   ├── Security Tooling
 │   └── Audit
-├── Infrastructure OU
-│   ├── Network Account (Transit Gateway, VPCs, PrivateLink, etc.)
-│   └── Shared Services
+├── Platform OU
+│   ├── Network (Transit Gateway, central egress, PrivateLink endpoints)
+│   └── Shared Services (identity, CI/CD, observability)
 ├── AI Workloads OU
-│   ├── Research & Experimentation (high autonomy, lower guardrails)
-│   ├── Production Agents (voice platforms, long-running agents, customer workloads)
-│   └── Data & Knowledge Platforms (RAG, vector stores, etc.)
-├── Sandbox OU
-│   └── Individual developer / agent research accounts
-└── Suspended / Deprecated
+│   ├── Research (higher autonomy, aggressive experimentation guardrails)
+│   ├── Production Agents (voice platforms, customer workloads, strict change control)
+│   └── Data & Knowledge (RAG stores, vector indexes, curated corpora)
+└── Sandbox
 ```
 
-Key design decisions we will document and refine over time:
-- When to use Control Tower vs custom landing zone
-- SCP strategy for AI workloads (Bedrock, SageMaker, Lambda, ECS, etc.)
-- IAM Identity Center permission sets for different personas (AI Engineer, Platform, Auditor, Emergency)
-- Networking model (centralized egress, PrivateLink for AI services, Transit Gateway segmentation)
-- Encryption and key management strategy (customer-managed KMS keys per OU)
-- Observability and cost allocation tags that actually work for agent runs
+Key decisions being worked through:
 
-## Current Status
+- Scope and granularity of Service Control Policies for Bedrock, SageMaker, Lambda, ECS, and tool-calling surfaces
+- IAM Identity Center permission sets that reflect actual operational personas (agent operator, platform engineer, incident responder, auditor)
+- Networking model that supports both centralized control and the low-latency/private connectivity patterns agents often require
+- Encryption and key management strategy that scales across dozens of accounts while supporting customer-managed keys for sensitive agent memory and tool outputs
+- Tagging and cost allocation model that can attribute spend to individual agents, customers, or experiments rather than just accounts
 
-**Phase 0 – Foundation (Current)**
-- [x] Repository created with strong initial documentation
-- [ ] Control Tower deployment runbook (manual + automated)
-- [ ] Core OU + account structure (as code)
-- [ ] Baseline SCPs for AI workloads
-- [ ] IAM Identity Center baseline
+## Status and Direction
 
-**Phase 1 – Governance & Security**
-- Service Control Policies tailored for agentic workloads
-- AWS Config rules + remediation for AI resources
-- Centralized logging and Security Hub aggregation
-- Backup and DR strategy for stateful agents
+The repository is in active development. Current focus is on the foundational controls and account vending patterns. Subsequent work will cover:
 
-**Phase 2 – AI-Specific Patterns**
-- Patterns for secure tool use from agents
-- Cost controls and budgets for LLM spend
-- Private connectivity to Bedrock / SageMaker endpoints
-- Workload isolation between research and production agents
+- AI-specific SCP libraries and exception handling processes
+- Workload identity patterns for agents that need to act across accounts
+- Cost guardrails and anomaly detection tuned for inference spend
+- Integration points with the agent runtime platform (see aws-agent-platform)
 
-**Phase 3 – Automation & GitOps**
-- Full Infrastructure as Code (Terraform or CDK)
-- Account vending machine / account factory customizations
-- CI/CD for landing zone changes
-- Self-service account provisioning with guardrails
+All major structural decisions are captured as ADRs as they are made.
 
-## Technology Choices (Will Be Justified Over Time)
+## Context
 
-- **Infrastructure as Code**: Terraform (primary) + possibly AWS CDK for specific AI constructs
-- **Landing Zone Engine**: AWS Control Tower + customizations (or pure custom if needed)
-- **Identity**: IAM Identity Center (SSO)
-- **Networking**: Transit Gateway + VPC Lattice where appropriate
-- **Security**: KMS, GuardDuty, Security Hub, IAM Access Analyzer, Detective
-- **Observability**: CloudWatch + X-Ray + OpenTelemetry for agent runs
-
-## How to Use This Repository
-
-This is not a "deploy and forget" template. It is a **reference implementation + living decision log**.
-
-Each major decision will have an ADR (Architecture Decision Record) in `/docs/adrs/`.
-
-When I apply for Solutions Architect roles or consulting engagements, this repo (plus the other projects in the portfolio) becomes the concrete evidence of deep, practical experience.
-
-## Related Living Projects
-
-This landing zone is the foundation for the rest of the portfolio:
-
-- [aws-agent-platform](../aws-agent-platform) — The actual production runtime for voice-controlled and autonomous agents
-- [aws-well-architected-ai](../aws-well-architected-ai) — Reference architectures + full Well-Architected reviews
-- [aws-sovereign-infrastructure](../aws-sovereign-infrastructure) — Highly restricted patterns for sensitive clients
-
-## Getting Started (Local)
-
-```bash
-git clone https://github.com/deliverydriver/aws-landing-zone-for-ai
-cd aws-landing-zone-for-ai
-
-# (Coming soon) Terraform setup + Control Tower bootstrap scripts
-```
-
-## Contributing / Evolution
-
-This project will be updated publicly as I study and build. Feedback, issues, and PRs that improve the architecture (especially around AI/agent workloads) are welcome.
+This work sits alongside production agent systems already running in more constrained environments. The goal is a landing zone that supports both high-velocity research and regulated production workloads without requiring completely separate foundations.
 
 ---
 
-**Goal**: By the time I sit the AWS Solutions Architect Professional exam, this repository + the others in the portfolio should be strong enough that any interviewer can see: "This person doesn't just know the theory — they are actively building and operating real systems at this level of sophistication."
-
-Built by Benjamin Pittman (Spacecoast) while preparing for the AWS Certified Solutions Architect – Professional exam.
+Further reading in the sibling repositories covers the actual agent runtime, reference architectures under operational review, and patterns for more restricted environments.
