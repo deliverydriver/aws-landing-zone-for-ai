@@ -57,4 +57,40 @@ This work sits alongside production agent systems already running in more constr
 
 ---
 
+## Services and Patterns for Demonstrating Depth
+
+To credibly signal extensive hands-on experience, this project will incorporate sophisticated, production-grade usage of the following AWS capabilities (not superficial mentions, but real architectural integration with the AI/agentic constraints):
+
+**Governance & Organizations**
+- AWS Organizations with delegated administrator models for Security Hub, GuardDuty, Config, etc.
+- Advanced Service Control Policies (SCPs) with AI-specific restrictions (e.g., Bedrock model filtering, SageMaker instance type controls, cross-account tool invocation boundaries, Lambda layer and execution role constraints).
+- IAM Identity Center with ABAC, permission boundaries, and persona-specific permission sets (agent operator vs platform engineer vs emergency access).
+- AWS Control Tower with Account Factory for Terraform (AFT) or equivalent custom landing zone automation, including strong baseline enforcement and exception workflows.
+
+**Networking & Connectivity (Deep)**
+- Transit Gateway with complex routing tables, peering attachments, and centralized inspection via Gateway Load Balancer + third-party appliances.
+- Extensive use of VPC endpoints / PrivateLink for Bedrock, SageMaker, and internal agent tool services across accounts.
+- Centralized egress architectures with inspection, advanced NAT strategies, and support for the low-latency private connectivity that voice and real-time agent workloads often require.
+- VPC Lattice for service-to-service connectivity with fine-grained auth between research and production agent environments.
+
+**Security & Compliance at Scale**
+- Customer-managed KMS keys with complex key policies, grants, automatic rotation, and multi-region replication strategies tailored to agent memory and tool output sensitivity.
+- AWS Config with custom rules and conformance packs specifically for AI resources and agent tool servers.
+- Full Security Hub + GuardDuty + Inspector + Macie + Detective aggregation, with custom insights and automated response for agent-related findings.
+- Organization-level CloudTrail + CloudTrail Lake for deep auditing of agent actions and cross-account tool use.
+- IAM Access Analyzer at organization scale for external access and unused access findings.
+
+**Cost & FinOps (Agent-Specific)**
+- AWS Cost and Usage Report (CUR) 2.0 + Athena + QuickSight (or custom tooling) for attribution down to individual agent sessions or experiments.
+- AWS Budgets combined with anomaly detection and Lambda-based remediation tuned for inference spend volatility.
+- Savings Plans, Spot, and Graviton strategies documented per workload type (research vs production agents).
+- Tagging strategies and enforcement that survive agent delegation and multi-turn workflows.
+
+**Observability & Operations**
+- Centralized observability (CloudWatch + X-Ray + OpenTelemetry) with cross-account visibility for agent platforms.
+- AWS Systems Manager for baseline configuration, patching, and drift detection across the estate.
+- Custom operational dashboards that surface "agent platform health" metrics at the landing zone level.
+
+These will be implemented via reusable Terraform modules, with detailed ADRs explaining the choices, and real (anonymized where necessary) examples of policy, tagging, and cost models that only experienced practitioners typically produce.
+
 Further reading in the sibling repositories covers the actual agent runtime, reference architectures under operational review, and patterns for more restricted environments.

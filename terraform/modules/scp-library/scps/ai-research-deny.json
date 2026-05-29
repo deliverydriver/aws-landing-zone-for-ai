@@ -1,0 +1,44 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyExpensiveModelInvocationsWithoutApproval",
+      "Effect": "Deny",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "bedrock:Converse",
+        "bedrock:ConverseStream"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "bedrock:InferenceModel": [
+            "*claude-3-opus*",
+            "*claude-3-5-sonnet*",
+            "*gpt-4o*",
+            "*command-r-plus*"
+          ]
+        },
+        "StringNotEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "DenyBroadS3AccessFromAgents",
+      "Effect": "Deny",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::*/*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:PrincipalTag/AllowedS3Prefix": "*"
+        }
+      }
+    }
+  ]
+}
