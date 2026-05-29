@@ -111,7 +111,7 @@ This landing zone is the foundation for the rest of the portfolio:
 ## Getting Started (Local)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/aws-landing-zone-for-ai
+git clone https://github.com/deliverydriver/aws-landing-zone-for-ai
 cd aws-landing-zone-for-ai
 
 # (Coming soon) Terraform setup + Control Tower bootstrap scripts
