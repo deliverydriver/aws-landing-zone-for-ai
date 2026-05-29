@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Environment & secrets (CRITICAL - never commit)
+.env
+.env.local
+.env.*.local
+*.pem
+secrets/
+*.key
+grok-voice-control-secrets.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS / Editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-*
+Thumbs.db
+
+# Test / Coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary / dev
+*.tmp
+*.temp
+.cache/
+.grok-local-test-*/
+
+# LiveKit / agent specific
+livekit-*.log
+agent-*.pid
+
+# The grok binary itself is not in this repo
+# (users point to their own ~/.grok/bin/grok)
