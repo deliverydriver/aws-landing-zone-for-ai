@@ -40,6 +40,39 @@ Key decisions being worked through:
 - Encryption and key management strategy that scales across dozens of accounts while supporting customer-managed keys for sensitive agent memory and tool outputs
 - Tagging and cost allocation model that can attribute spend to individual agents, customers, or experiments rather than just accounts
 
+## How It Works
+
+The landing zone operates through three interconnected layers of control:
+
+### 1. Structural Isolation
+Workloads are placed into different Organizational Units based on their trust and autonomy requirements:
+
+- **Research** accounts receive relatively permissive guardrails to support rapid experimentation.
+- **Production Agents** accounts are heavily constrained — model access is limited to approved configurations, and most tool execution must flow through the approval proxy defined in the agent platform.
+- **Data & Knowledge** accounts focus on controlled access to curated data with strong encryption and auditing requirements.
+
+Every account receives a consistent baseline (encryption defaults, IMDSv2 enforcement, tagging, public access blocks, etc.) via the `account-baseline` module.
+
+### 2. Policy and Network Enforcement
+Guardrails are applied at multiple levels:
+
+- **Service Control Policies (SCPs)** act as the outer boundary. They are designed around *capabilities* rather than simple allow/deny lists (see ADR 0001 for the philosophy).
+- **Networking** forces almost all model invocations and cross-account tool calls over PrivateLink. There is no broad internet egress from production agent accounts.
+- **IAM Identity Center** + permission boundaries define what humans and automated processes can do inside each account.
+
+This combination means that even if an agent execution role is compromised or behaves unexpectedly, the blast radius is limited by controls that cannot be bypassed from within the account.
+
+### 3. Operational Mechanisms
+Beyond static guardrails, the landing zone enables ongoing control:
+
+- **Cost attribution** is designed to work at the agent or experiment level through consistent tagging and CUR processing, rather than just at the account level.
+- **Observability** is centralized so that agent behavior, tool usage, and model calls can be audited across account boundaries.
+- **Exception handling** for SCPs and baselines is treated as a first-class operational process with documented compensating controls.
+
+In practice, when an agent running in a Production account wants to use a tool in another account, the call is typically routed through the tool execution proxy (defined in `aws-agent-platform`). The proxy performs capability checks and risk evaluation before the actual action is allowed — and the SCPs in the landing zone prevent the agent from bypassing this proxy.
+
+This creates defense-in-depth: the landing zone provides the hard outer boundaries and shared infrastructure, while the agent platform provides the dynamic, context-aware controls around tool use.
+
 ## Status and Direction
 
 The repository is in active development. Current focus is on the foundational controls and account vending patterns. Subsequent work will cover:
